@@ -12,10 +12,10 @@ class StorageManager {
 public:
     static constexpr char FILE_NAME[] = "/Users/crenat/filesystem.dat";
     static constexpr int USERS_COUNT = 100;
-    static constexpr int INODES_COUNT = 5000;
+    static constexpr int INODES_COUNT = 20000;
+    static constexpr int BLOCK_SIZE = 512;
 
     static StorageManager& getInstance();
-    // StorageManager(const StorageManager&) = delete;
 
     template<typename EntityType>
     void writeEntity(const EntityType& entity, std::streamoff startPos) const;
@@ -32,14 +32,17 @@ public:
     bool addUser(const User& user);
     void persistUsersInBinaryFile(const std::vector<User>& users);
 
+    // Inodes related methods
+    std::vector<Inode> getInodes() const;
+    Inode getInodeByUid(int uid) const;
+    Inode getInodeByLocation(const std::string& location) const;
+    std::vector<Inode> getInodesForLocation(const std::string& location) const;
+    std::vector<Inode> getDirectoriesForLocation(const std::string& location) const;
+    std::vector<Inode> getFilesForLocation(const std::string& location) const;
+    bool addInode(const Inode& inode);
+    void persistInodesInBinaryFile(const std::vector<Inode>& inodes);
+
 private:
-    // Private constructor for Singleton pattern
-    // StorageManager();
-    // ~StorageManager();
-
-    // StorageManager(const StorageManager&) = delete;
-    // StorageManager& operator=(const StorageManager&) = delete;
-
     static StorageManager instance_;
 
     // Private methods for internal use

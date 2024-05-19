@@ -80,6 +80,8 @@
     "semaphore": "cpp",
     "shared_mutex": "cpp",
     "span": "cpp",
-    "stack": "cpp"
+    "stack": "cpp",
+    "qmessagebox": "cpp",
+    "qstandarditemmodel": "cpp"
   }
 }

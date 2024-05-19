@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QtCore>
 #include <QMessageBox>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,6 +19,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(loginDialog, &LoginDialog::loggedIn, this, &MainWindow::handleLogin);
     currentUserID = -1;
+
+    std::string location = "/";
+
     ui->currentUserLabel->setText("Current user: none");
     ui->actionButton->setText("Login");
     std::vector<User> users = storageManager.getUsers();
@@ -27,6 +31,16 @@ MainWindow::MainWindow(QWidget *parent)
         User user = users.at(i);
         qDebug() << user.uid << " " << user.username << " " << user.password << " " << user.firstName << " " << user.lastName;
     }
+
+    // std::vector<Inode> inodes = storageManager.getInodes();
+
+    // for (int i = 0; i < inodes.size(); i++)
+    // {
+    //     Inode inode = inodes.at(i);
+    //     qDebug() << inode.uid << " " << inode.name << " " << inode.location << " " << inode.isDirectory << " " << inode.size << " " << inode.ownerUid << " " << inode.accessRights.read << " " << inode.accessRights.write;
+    // }
+
+    changeLocation("/");
 }
 
 MainWindow::~MainWindow()
@@ -73,3 +87,246 @@ void MainWindow::on_actionButton_clicked()
     loginDialog->setWindowModality(Qt::WindowModality::ApplicationModal);
     loginDialog->show();
 }
+
+void MainWindow::renderDirectories(const std::string& location)
+{
+    std::vector<Inode> directoriesInodes = storageManager.getDirectoriesForLocation(location);
+
+    QStringListModel *directoriesModel = new QStringListModel();
+    QStringList directoriesList;
+
+    for (int i = 0; i < directoriesInodes.size(); i++)
+    {
+        Inode inode = directoriesInodes.at(i);
+        directoriesList << QString::fromStdString(inode.name);
+    }
+
+    directoriesModel->setStringList(directoriesList);
+    ui->directoriesListView->setModel(directoriesModel);
+}
+
+void MainWindow::renderFiles(const std::string& location)
+{
+    std::vector<Inode> filesInodes = storageManager.getFilesForLocation(location);
+
+    QStringListModel *filesModel = new QStringListModel();
+    QStringList filesList;
+
+    for (int i = 0; i < filesInodes.size(); i++)
+    {
+        Inode inode = filesInodes.at(i);
+        filesList << QString::fromStdString(inode.name);
+    }
+
+    filesModel->setStringList(filesList);
+    ui->filesListView->setModel(filesModel);
+}
+
+void MainWindow::renderLocation(const std::string& location)
+{
+    std::vector<Inode> inodes = storageManager.getInodes();
+
+    qDebug() << " ";
+    for (int i = 0; i < inodes.size(); i++)
+    {
+        Inode inode = inodes.at(i);
+        qDebug() << inode.uid << " " << inode.name << " " << inode.location << " " << inode.isDirectory << " " << inode.size << " " << inode.ownerUid << " " << inode.accessRights.read << " " << inode.accessRights.write;
+    }
+
+    renderDirectories(location);
+    renderFiles(location);
+}
+
+void MainWindow::changeLocation(const std::string& location)
+{
+    this->location = location == "" ? "/" : location;
+    this->ui->locationLabel->setText(QString::fromStdString(location));
+    renderLocation(location);
+}
+
+void MainWindow::on_createDirectoryPushButton_clicked()
+{
+    if (currentUserID == -1)
+    {
+        QMessageBox::warning(this, "Create Directory Failed", "You must be logged in to create a directory");
+        return;
+    }
+
+    QString directoryName = QInputDialog::getText(this, "Create Directory", "Enter directory name");
+
+    if (directoryName.isEmpty())
+    {
+        return;
+    }
+
+    Inode newDirectory;
+    newDirectory.uid = -1;
+    newDirectory.isDirectory = true;
+    newDirectory.size = 0;
+    newDirectory.ownerUid = currentUserID;
+    newDirectory.accessRights.read = true;
+    newDirectory.accessRights.write = true;
+    strcpy(newDirectory.name, directoryName.toStdString().c_str());
+    strcpy(newDirectory.location, location.c_str());
+
+
+    if (storageManager.addInode(newDirectory))
+    {
+        QMessageBox::information(this, "Create Directory Successful", "Directory created successfully");
+        renderLocation(location);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Create Directory Failed", "Directory creation failed");
+    }
+}
+
+void MainWindow::on_directoriesListView_doubleClicked(const QModelIndex &index)
+{
+    QString directoryName = index.data().toString();
+
+    if (this->location == "/")
+    {
+        changeLocation("/" + directoryName.toStdString());
+        return;
+    }
+
+    std::string newLocation = this->location + "/" + directoryName.toStdString();
+
+    changeLocation(newLocation);
+}
+
+
+void MainWindow::on_backPushButton_clicked()
+{
+    if (location == "/")
+    {
+        return;
+    }
+
+    std::string newLocation = location.substr(0, location.find_last_of("/"));
+    changeLocation(newLocation.size() > 0 ? newLocation : "/");
+}
+
+
+void MainWindow::on_createFilePushButton_clicked()
+{
+    if (currentUserID == -1)
+    {
+        QMessageBox::warning(this, "Create File Failed", "You must be logged in to create a file");
+        return;
+    }
+
+    QString fileName = QInputDialog::getText(this, "Create File", "Enter file name");
+
+    if (fileName.isEmpty())
+    {
+        return;
+    }
+
+    Inode newFile;
+    newFile.isDirectory = false;
+    newFile.size = 0;
+    newFile.ownerUid = currentUserID;
+    newFile.accessRights.read = true;
+    newFile.accessRights.write = true;
+    strcpy(newFile.name, fileName.toStdString().c_str());
+    strcpy(newFile.location, location.c_str());
+
+    if (storageManager.addInode(newFile))
+    {
+        QMessageBox::information(this, "Create File Successful", "File created successfully");
+        renderLocation(location);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Create File Failed", "File creation failed");
+    }
+}
+
+
+void MainWindow::on_directoriesListView_clicked(const QModelIndex &index)
+{
+    QString directoryName = index.data().toString();
+
+    std::vector<Inode> directoriesInodes = storageManager.getDirectoriesForLocation(location);
+
+    for (int i = 0; i < directoriesInodes.size(); i++)
+    {
+        Inode inode = directoriesInodes.at(i);
+
+        if (QString::fromStdString(inode.name) == directoryName)
+        {
+            QStandardItemModel *model = new QStandardItemModel(5, 2, this);
+            model->setHorizontalHeaderItem(0, new QStandardItem("Property"));
+            model->setHorizontalHeaderItem(1, new QStandardItem("Value"));
+
+            User owner = storageManager.getUserByUid(inode.ownerUid);
+
+            model->setItem(0, 0, new QStandardItem("Name"));
+            model->setItem(0, 1, new QStandardItem(QString::fromStdString(inode.name)));
+
+            model->setItem(1, 0, new QStandardItem("Location"));
+            model->setItem(1, 1, new QStandardItem(QString::fromStdString(inode.location)));
+
+            model->setItem(2, 0, new QStandardItem("Owner"));
+            model->setItem(2, 1, new QStandardItem(QString::fromStdString(owner.firstName) + " " + QString::fromStdString(owner.lastName)));
+
+            model->setItem(3, 0, new QStandardItem("Can read (For non owner)"));
+            model->setItem(3, 1, new QStandardItem(inode.accessRights.read ? "Yes" : "No"));
+
+            model->setItem(4, 0, new QStandardItem("Can write (For non owner)"));
+            model->setItem(4, 1, new QStandardItem(inode.accessRights.write ? "Yes" : "No"));
+
+            this->ui->infoTableView->setModel(model);
+            return;
+        }
+    }
+}
+
+
+void MainWindow::on_filesListView_clicked(const QModelIndex &index)
+{
+    QString fileName = index.data().toString();
+
+    std::vector<Inode> filesInodes = storageManager.getFilesForLocation(location);
+
+    for (int i = 0; i < filesInodes.size(); i++)
+    {
+        Inode inode = filesInodes.at(i);
+
+        if (QString::fromStdString(inode.name) == fileName)
+        {
+            QStandardItemModel *model = new QStandardItemModel(7, 2, this);
+            model->setHorizontalHeaderItem(0, new QStandardItem("Property"));
+            model->setHorizontalHeaderItem(1, new QStandardItem("Value"));
+
+            User owner = storageManager.getUserByUid(inode.ownerUid);
+
+            model->setItem(0, 0, new QStandardItem("Name"));
+            model->setItem(0, 1, new QStandardItem(QString::fromStdString(inode.name)));
+
+            model->setItem(1, 0, new QStandardItem("Location"));
+            model->setItem(1, 1, new QStandardItem(QString::fromStdString(inode.location)));
+
+            model->setItem(2, 0, new QStandardItem("Owner"));
+            model->setItem(2, 1, new QStandardItem(QString::fromStdString(owner.firstName) + " " + QString::fromStdString(owner.lastName)));
+
+            model->setItem(3, 0, new QStandardItem("Can read (For non owner)"));
+            model->setItem(3, 1, new QStandardItem(inode.accessRights.read ? "Yes" : "No"));
+
+            model->setItem(4, 0, new QStandardItem("Can write (For non owner)"));
+            model->setItem(4, 1, new QStandardItem(inode.accessRights.write ? "Yes" : "No"));
+
+            model->setItem(5, 0, new QStandardItem("Size"));
+            model->setItem(5, 1, new QStandardItem(QString::number(inode.size)));
+
+            model->setItem(6, 0, new QStandardItem("Size on disk"));
+            model->setItem(6, 1, new QStandardItem(QString::number(inode.size && StorageManager::BLOCK_SIZE - (inode.size % StorageManager::BLOCK_SIZE) ? inode.size / StorageManager::BLOCK_SIZE + 1 : inode.size / StorageManager::BLOCK_SIZE)));
+
+            this->ui->infoTableView->setModel(model);
+            return;
+        }
+    }
+}
+

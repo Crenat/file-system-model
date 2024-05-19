@@ -11,8 +11,10 @@ struct Inode
 {
     int uid;
     char name[50];
+    char location[100];
     bool isDirectory;
     int size;
+    int ownerUid;
     InodeAccessRights accessRights;
 };
 

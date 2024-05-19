@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1003</width>
     <height>600</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
    <widget class="QPushButton" name="actionButton">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>880</x>
       <y>0</y>
       <width>100</width>
       <height>32</height>
@@ -40,15 +40,99 @@
      <string>Action Button</string>
     </property>
    </widget>
-   <widget class="QListView" name="listView">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
-      <width>261</width>
-      <height>341</height>
+      <y>70</y>
+      <width>981</width>
+      <height>471</height>
      </rect>
     </property>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Directories</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="directoriesListView"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="createDirectoryPushButton">
+         <property name="text">
+          <string>Create Directory</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Files</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="filesListView"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="createFilePushButton">
+         <property name="text">
+          <string>Create File</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Info</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableView" name="infoTableView"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>571</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
+     <item>
+      <widget class="QPushButton" name="backPushButton">
+       <property name="text">
+        <string>Back</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="locationLabel">
+       <property name="text">
+        <string>Current location</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -56,8 +140,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>22</height>
+     <width>1003</width>
+     <height>24</height>
     </rect>
    </property>
   </widget>
