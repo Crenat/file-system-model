@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "authenticationmanager.h"
+
 namespace Ui {
 class LoginDialog;
 }
@@ -16,13 +18,14 @@ public:
     ~LoginDialog();
 
 signals:
-    void loggedIn(bool success, const QString& username, const QString& password);
+    void loggedIn(bool success, int uid);
 
 private slots:
     void attemptLogin();
 
 private:
     Ui::LoginDialog *ui;
+    AuthenticationManager authenticationManager;
 };
 
 #endif // LOGINDIALOG_H

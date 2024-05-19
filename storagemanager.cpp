@@ -1,16 +1,17 @@
 #include "storagemanager.h"
 #include <iostream>
 #include <string.h>
+#include <stdio.h>
 #include <QDebug>
 
 #include "user.h"
-#include <stdio.h>
+#include "inode.h"
 
 constexpr char StorageManager::FILE_NAME[];
 
-StorageManager& StorageManager::instance() {
-    static StorageManager instance;
-    return instance;
+StorageManager& StorageManager::getInstance() {
+    static StorageManager instance_;
+    return instance_;
 }
 
 template<typename EntityType>
@@ -133,4 +134,21 @@ std::fstream& StorageManager::getFileStream() const {
 template<typename EntityType>
 std::streamoff StorageManager::getEntityStartPosition(int entityIndex) const {
     return sizeof(EntityType) * entityIndex;
+}
+
+template<typename EntityType>
+int StorageManager::getEntityGroupSize(int entitiesCount) const {
+    return sizeof(EntityType) * entitiesCount + resolveEntityGroupStartPosition<EntityType>();
+}
+
+template<typename EntityType>
+int StorageManager::resolveEntityGroupStartPosition() const {
+    switch (sizeof(EntityType)) {
+        case sizeof(User):
+            return 0;
+        case sizeof(Inode):
+            return USERS_COUNT * sizeof(User);
+        default:
+            return 0;
+    }
 }

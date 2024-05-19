@@ -74,6 +74,12 @@
     "list": "cpp",
     "map": "cpp",
     "format": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "deque": "cpp",
+    "queue": "cpp",
+    "semaphore": "cpp",
+    "shared_mutex": "cpp",
+    "span": "cpp",
+    "stack": "cpp"
   }
 }

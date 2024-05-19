@@ -22,11 +22,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void logout();
-    bool login(QString username, QString password);
+    void login(int uid);
 
 private slots:
     void on_actionButton_clicked();
-    void handleLogin(bool success, const QString& username, const QString& password);
+    void handleLogin(bool success, int uid);
 
 private:
     Ui::MainWindow *ui;

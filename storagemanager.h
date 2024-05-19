@@ -1,9 +1,12 @@
 #ifndef STORAGEMANAGER_H
 #define STORAGEMANAGER_H
 
-#include "user.h"
 #include <fstream>
+#include <iostream>
 #include <vector>
+
+#include "user.h"
+#include "inode.h"
 
 class StorageManager {
 public:
@@ -11,7 +14,8 @@ public:
     static constexpr int USERS_COUNT = 100;
     static constexpr int INODES_COUNT = 5000;
 
-    static StorageManager& instance();
+    static StorageManager& getInstance();
+    // StorageManager(const StorageManager&) = delete;
 
     template<typename EntityType>
     void writeEntity(const EntityType& entity, std::streamoff startPos) const;
@@ -30,13 +34,25 @@ public:
 
 private:
     // Private constructor for Singleton pattern
-    StorageManager() = default;
+    // StorageManager();
+    // ~StorageManager();
+
+    // StorageManager(const StorageManager&) = delete;
+    // StorageManager& operator=(const StorageManager&) = delete;
+
+    static StorageManager instance_;
 
     // Private methods for internal use
     std::fstream& getFileStream() const;
 
     template<typename EntityType>
     std::streamoff getEntityStartPosition(int entityIndex) const;
+
+    template<typename EntityType>
+    int getEntityGroupSize(int entitiesCount) const;
+
+    template<typename EntityType>
+    int resolveEntityGroupStartPosition() const;
 
     // Private data members
     mutable std::fstream fileStream_;

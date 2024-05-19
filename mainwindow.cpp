@@ -5,13 +5,14 @@
 
 #include <QInputDialog>
 #include <QDebug>
+#include <QtCore>
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , loginDialog(new LoginDialog(this))
-    , storageManager(StorageManager::instance())
+    , storageManager(StorageManager::getInstance())
 {
     ui->setupUi(this);
 
@@ -33,29 +34,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::handleLogin(bool success, const QString& username, const QString& password) {
-    if (success) {
-        QMessageBox::information(this, "Login Successful", "Welcome " + username);
-        bool success = this->login(username, password);
-        if (success) {
-            ui->actionButton->setText("Logout");
-        }
-    } else {
+void MainWindow::handleLogin(bool success, int uid) {
+    if (!success) {
         QMessageBox::warning(this, "Login Failed", "Invalid username or password");
+        return;
     }
+
+    User user = storageManager.getUserByUid(uid);
+    login(user.uid);
+
+    QMessageBox::information(this, "Login Successful", QString("Welcome %1").arg(user.username));
+    ui->actionButton->setText("Logout");
 }
 
-bool MainWindow::login(QString username, QString password)
+void MainWindow::login(int uid)
 {
-    User candidate = storageManager.getUserByUsername(username.toStdString());
+    User candidate = storageManager.getUserByUid(uid);
 
-    if (candidate.uid != -1 && candidate.password == password.toStdString())
-    {
-        currentUserID = candidate.uid;
-        ui->currentUserLabel->setText("Current user: " + QString::fromStdString(candidate.firstName) + " " + QString::fromStdString(candidate.lastName)); 
-        return true;
-    }
-    return false;
+    currentUserID = candidate.uid;
+    ui->currentUserLabel->setText("Current user: " + QString::fromStdString(candidate.firstName) + " " + QString::fromStdString(candidate.lastName));
 }
 
 void MainWindow::logout()
