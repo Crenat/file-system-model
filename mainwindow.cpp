@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "storagemanager.h"
 #include "./ui_mainwindow.h"
+#include "createfiledialog.h"
 #include "user.h"
 
 #include <QInputDialog>
@@ -13,11 +14,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , loginDialog(new LoginDialog(this))
+    , createFileDialog(new CreateFileDialog(this))
     , storageManager(StorageManager::getInstance())
 {
     ui->setupUi(this);
 
     connect(loginDialog, &LoginDialog::loggedIn, this, &MainWindow::handleLogin);
+    connect(createFileDialog, &CreateFileDialog::submit, this, &MainWindow::handleCreateNewFile);
     currentUserID = -1;
 
     std::string location = "/";
@@ -98,7 +101,11 @@ void MainWindow::renderDirectories(const std::string& location)
     for (int i = 0; i < directoriesInodes.size(); i++)
     {
         Inode inode = directoriesInodes.at(i);
-        directoriesList << QString::fromStdString(inode.name);
+        bool isOwner = inode.ownerUid == currentUserID;
+
+        if (isOwner || inode.accessRights.read) {
+            directoriesList << QString::fromStdString(inode.name);
+        }
     }
 
     directoriesModel->setStringList(directoriesList);
@@ -115,7 +122,11 @@ void MainWindow::renderFiles(const std::string& location)
     for (int i = 0; i < filesInodes.size(); i++)
     {
         Inode inode = filesInodes.at(i);
-        filesList << QString::fromStdString(inode.name);
+        bool isOwner = inode.ownerUid == currentUserID;
+
+        if (isOwner || inode.accessRights.read) {
+            filesList << QString::fromStdString(inode.name);
+        }
     }
 
     filesModel->setStringList(filesList);
@@ -208,29 +219,21 @@ void MainWindow::on_backPushButton_clicked()
     changeLocation(newLocation.size() > 0 ? newLocation : "/");
 }
 
-
-void MainWindow::on_createFilePushButton_clicked()
+void MainWindow::handleCreateNewFile(const std::string filename, int size)
 {
-    if (currentUserID == -1)
-    {
-        QMessageBox::warning(this, "Create File Failed", "You must be logged in to create a file");
-        return;
-    }
-
-    QString fileName = QInputDialog::getText(this, "Create File", "Enter file name");
-
-    if (fileName.isEmpty())
+    qDebug() << filename << size;
+    if (!filename.size())
     {
         return;
     }
 
     Inode newFile;
     newFile.isDirectory = false;
-    newFile.size = 0;
+    newFile.size = size;
     newFile.ownerUid = currentUserID;
     newFile.accessRights.read = true;
     newFile.accessRights.write = true;
-    strcpy(newFile.name, fileName.toStdString().c_str());
+    strcpy(newFile.name, filename.c_str());
     strcpy(newFile.location, location.c_str());
 
     if (storageManager.addInode(newFile))
@@ -242,6 +245,18 @@ void MainWindow::on_createFilePushButton_clicked()
     {
         QMessageBox::warning(this, "Create File Failed", "File creation failed");
     }
+}
+
+void MainWindow::on_createFilePushButton_clicked()
+{
+    if (currentUserID == -1)
+    {
+        QMessageBox::warning(this, "Create File Failed", "You must be logged in to create a file");
+        return;
+    }
+
+    createFileDialog->setWindowModality(Qt::WindowModality::ApplicationModal);
+    createFileDialog->show();
 }
 
 
@@ -322,7 +337,7 @@ void MainWindow::on_filesListView_clicked(const QModelIndex &index)
             model->setItem(5, 1, new QStandardItem(QString::number(inode.size)));
 
             model->setItem(6, 0, new QStandardItem("Size on disk"));
-            model->setItem(6, 1, new QStandardItem(QString::number(inode.size && StorageManager::BLOCK_SIZE - (inode.size % StorageManager::BLOCK_SIZE) ? inode.size / StorageManager::BLOCK_SIZE + 1 : inode.size / StorageManager::BLOCK_SIZE)));
+            model->setItem(6, 1, new QStandardItem(QString::number(inode.size && StorageManager::BLOCK_SIZE - (inode.size % StorageManager::BLOCK_SIZE) ? (inode.size / StorageManager::BLOCK_SIZE + 1) * StorageManager::BLOCK_SIZE : inode.size)));
 
             this->ui->infoTableView->setModel(model);
             return;

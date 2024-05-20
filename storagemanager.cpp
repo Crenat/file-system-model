@@ -202,6 +202,15 @@ void StorageManager::persistInodesInBinaryFile(const std::vector<Inode>& inodes)
     }
 }
 
+int StorageManager::getAvailableSpace() const {
+    std::vector<Inode> inodes = getInodes();
+    int usedSpace = 0;
+    for (size_t i = 0; i < inodes.size(); ++i) {
+        usedSpace += inodes[i].size;
+    }
+    return BLOCK_SIZE * INODES_COUNT - usedSpace;
+}
+
 std::fstream& StorageManager::getFileStream() const {
     if (!fileStream_.is_open()) {
         fileStream_.open(FILE_NAME, std::ios::binary | std::ios::in | std::ios::out);

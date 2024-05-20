@@ -41,6 +41,7 @@ public:
     std::vector<Inode> getFilesForLocation(const std::string& location) const;
     bool addInode(const Inode& inode);
     void persistInodesInBinaryFile(const std::vector<Inode>& inodes);
+    int getAvailableSpace() const;
 
 private:
     static StorageManager instance_;

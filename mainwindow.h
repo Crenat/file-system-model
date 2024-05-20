@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "logindialog.h"
+#include "createfiledialog.h"
 #include "storagemanager.h"
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +29,7 @@ public:
 private slots:
     void on_actionButton_clicked();
     void handleLogin(bool success, int uid);
+    void handleCreateNewFile(const std::string filename, int size);
 
     void on_createDirectoryPushButton_clicked();
 
@@ -44,6 +46,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     LoginDialog *loginDialog;
+    CreateFileDialog *createFileDialog;
     StorageManager& storageManager;
 
     void renderDirectories(const std::string& location);
