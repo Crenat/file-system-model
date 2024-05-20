@@ -104,8 +104,12 @@ User StorageManager::getUserByUsername(const std::string& username) const {
 }
 
 bool StorageManager::addUser(const User& user) {
+    User& _user = const_cast<User&>(user);
+
     std::vector<User> users = getUsers();
-    users.push_back(user);
+    int uid = users.size() + 1;
+    _user.uid = uid;
+    users.push_back(_user);
     persistUsersInBinaryFile(users);
     return true;
 }

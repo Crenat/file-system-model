@@ -16,7 +16,7 @@ public:
     ~CreateFileDialog();
 
 signals:
-    void submit(const std::string filename, int size);
+    void submit(const std::string filename, int size, bool canRead, bool canWrite);
 
 private slots:
     void on_buttonBox_accepted();

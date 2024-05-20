@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CreateFileDialog</class>
- <widget class="QDialog" name="CreateFileDialog">
+ <class>CreateDirectoryDialog</class>
+ <widget class="QDialog" name="CreateDirectoryDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>308</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>260</y>
+     <y>240</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -29,26 +29,13 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>10</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Create File</string>
-   </property>
-  </widget>
   <widget class="QSplitter" name="splitter">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>80</y>
+     <y>90</y>
      <width>331</width>
-     <height>91</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="orientation">
@@ -68,29 +55,21 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Size</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="sizeSpinBox">
-       <property name="suffix">
-        <string> bytes</string>
-       </property>
-       <property name="maximum">
-        <number>9999</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>10</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create Directory</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="layoutWidget_3">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -132,7 +111,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CreateFileDialog</receiver>
+   <receiver>CreateDirectoryDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -148,7 +127,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CreateFileDialog</receiver>
+   <receiver>CreateDirectoryDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

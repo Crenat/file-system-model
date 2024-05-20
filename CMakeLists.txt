@@ -40,6 +40,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         authenticationmanager.h authenticationmanager.cpp
         inode.h
         createfiledialog.h createfiledialog.cpp createfiledialog.ui
+        createuserdialog.h createuserdialog.cpp createuserdialog.ui
+        createdirectorydialog.h createdirectorydialog.cpp createdirectorydialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET file-system-model APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

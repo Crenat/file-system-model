@@ -14,13 +14,18 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , loginDialog(new LoginDialog(this))
+    , createDirectoryDialog(new CreateDirectoryDialog(this))
     , createFileDialog(new CreateFileDialog(this))
+    , createUserDialog(new CreateUserDialog(this))
     , storageManager(StorageManager::getInstance())
 {
     ui->setupUi(this);
 
     connect(loginDialog, &LoginDialog::loggedIn, this, &MainWindow::handleLogin);
+    connect(createDirectoryDialog, &CreateDirectoryDialog::submit, this, &MainWindow::handleCreateNewDirectory);
     connect(createFileDialog, &CreateFileDialog::submit, this, &MainWindow::handleCreateNewFile);
+    connect(createUserDialog, &CreateUserDialog::submit, this, &MainWindow::handleCreateNewUser);
+
     currentUserID = -1;
 
     std::string location = "/";
@@ -34,14 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
         User user = users.at(i);
         qDebug() << user.uid << " " << user.username << " " << user.password << " " << user.firstName << " " << user.lastName;
     }
-
-    // std::vector<Inode> inodes = storageManager.getInodes();
-
-    // for (int i = 0; i < inodes.size(); i++)
-    // {
-    //     Inode inode = inodes.at(i);
-    //     qDebug() << inode.uid << " " << inode.name << " " << inode.location << " " << inode.isDirectory << " " << inode.size << " " << inode.ownerUid << " " << inode.accessRights.read << " " << inode.accessRights.write;
-    // }
 
     changeLocation("/");
 }
@@ -70,6 +67,26 @@ void MainWindow::login(int uid)
 
     currentUserID = candidate.uid;
     ui->currentUserLabel->setText("Current user: " + QString::fromStdString(candidate.firstName) + " " + QString::fromStdString(candidate.lastName));
+    renderLocation(location);
+}
+
+void MainWindow::handleCreateNewUser(const std::string username, const std::string firstname, const std::string lastname, const std::string password)
+{
+    User newUser;
+    newUser.uid = -1;
+    strcpy(newUser.username, username.c_str());
+    strcpy(newUser.firstName, firstname.c_str());
+    strcpy(newUser.lastName, lastname.c_str());
+    strcpy(newUser.password, password.c_str());
+
+    if (storageManager.addUser(newUser))
+    {
+        QMessageBox::information(this, "Create User Successful", "User created successfully");
+    }
+    else
+    {
+        QMessageBox::warning(this, "Create User Failed", "User creation failed");
+    }
 }
 
 void MainWindow::logout()
@@ -77,6 +94,7 @@ void MainWindow::logout()
     currentUserID = -1;
     ui->currentUserLabel->setText("Current user: none");
     ui->actionButton->setText("Login");
+    renderLocation(location);
 }
 
 void MainWindow::on_actionButton_clicked()
@@ -155,7 +173,7 @@ void MainWindow::changeLocation(const std::string& location)
     renderLocation(location);
 }
 
-void MainWindow::on_createDirectoryPushButton_clicked()
+void MainWindow::handleCreateNewDirectory(const std::string filename, bool canRead, bool canWrite)
 {
     if (currentUserID == -1)
     {
@@ -163,9 +181,7 @@ void MainWindow::on_createDirectoryPushButton_clicked()
         return;
     }
 
-    QString directoryName = QInputDialog::getText(this, "Create Directory", "Enter directory name");
-
-    if (directoryName.isEmpty())
+    if (!filename.size())
     {
         return;
     }
@@ -175,9 +191,9 @@ void MainWindow::on_createDirectoryPushButton_clicked()
     newDirectory.isDirectory = true;
     newDirectory.size = 0;
     newDirectory.ownerUid = currentUserID;
-    newDirectory.accessRights.read = true;
-    newDirectory.accessRights.write = true;
-    strcpy(newDirectory.name, directoryName.toStdString().c_str());
+    newDirectory.accessRights.read = canRead;
+    newDirectory.accessRights.write = canWrite;
+    strcpy(newDirectory.name, filename.c_str());
     strcpy(newDirectory.location, location.c_str());
 
 
@@ -190,6 +206,18 @@ void MainWindow::on_createDirectoryPushButton_clicked()
     {
         QMessageBox::warning(this, "Create Directory Failed", "Directory creation failed");
     }
+}
+
+void MainWindow::on_createDirectoryPushButton_clicked()
+{
+    if (currentUserID == -1)
+    {
+        QMessageBox::warning(this, "Create Directory Failed", "You must be logged in to create a directory");
+        return;
+    }
+
+    createDirectoryDialog->setWindowModality(Qt::WindowModality::ApplicationModal);
+    createDirectoryDialog->show();
 }
 
 void MainWindow::on_directoriesListView_doubleClicked(const QModelIndex &index)
@@ -219,9 +247,8 @@ void MainWindow::on_backPushButton_clicked()
     changeLocation(newLocation.size() > 0 ? newLocation : "/");
 }
 
-void MainWindow::handleCreateNewFile(const std::string filename, int size)
+void MainWindow::handleCreateNewFile(const std::string filename, int size, bool canRead, bool canWrite)
 {
-    qDebug() << filename << size;
     if (!filename.size())
     {
         return;
@@ -231,8 +258,8 @@ void MainWindow::handleCreateNewFile(const std::string filename, int size)
     newFile.isDirectory = false;
     newFile.size = size;
     newFile.ownerUid = currentUserID;
-    newFile.accessRights.read = true;
-    newFile.accessRights.write = true;
+    newFile.accessRights.read = canRead;
+    newFile.accessRights.write = canWrite;
     strcpy(newFile.name, filename.c_str());
     strcpy(newFile.location, location.c_str());
 
@@ -343,5 +370,12 @@ void MainWindow::on_filesListView_clicked(const QModelIndex &index)
             return;
         }
     }
+}
+
+
+void MainWindow::on_createUserButton_clicked()
+{
+    createUserDialog->setWindowModality(Qt::WindowModality::ApplicationModal);
+    createUserDialog->show();
 }
 
