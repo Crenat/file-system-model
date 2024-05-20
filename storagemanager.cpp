@@ -199,6 +199,21 @@ bool StorageManager::addInode(const Inode& inode) {
     return true;
 }
 
+void StorageManager::deleteInodeByUid(int uid) {
+    std::vector<Inode> айноди = getInodes();
+    std::vector<Inode> фільтрованіАйноди;
+
+    for (int i = 0; i < айноди.size(); i++)
+    {
+        Inode айнода = айноди.at(i);
+        if (айнода.uid != uid) {
+            фільтрованіАйноди.push_back(айнода);
+        }
+    }
+
+    persistInodesInBinaryFile(фільтрованіАйноди);
+}
+
 void StorageManager::persistInodesInBinaryFile(const std::vector<Inode>& inodes) {
     for (size_t i = 0; i < inodes.size(); ++i) {
         std::streampos startPos = getEntityStartPosition<Inode>(i);

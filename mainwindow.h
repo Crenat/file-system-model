@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
 public:
     int currentUserID;
     std::string location;
+    int selectedInodeUid;
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void logout();
@@ -48,6 +49,8 @@ private slots:
     void on_filesListView_clicked(const QModelIndex &index);
 
     void on_createUserButton_clicked();
+
+    void on_deleteButton_clicked();
 
 private:
     Ui::MainWindow *ui;

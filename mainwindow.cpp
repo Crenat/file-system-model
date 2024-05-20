@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(createUserDialog, &CreateUserDialog::submit, this, &MainWindow::handleCreateNewUser);
 
     currentUserID = -1;
+    selectedInodeUid = -1;
 
     std::string location = "/";
 
@@ -92,6 +93,7 @@ void MainWindow::handleCreateNewUser(const std::string username, const std::stri
 void MainWindow::logout()
 {
     currentUserID = -1;
+    selectedInodeUid = -1;
     ui->currentUserLabel->setText("Current user: none");
     ui->actionButton->setText("Login");
     renderLocation(location);
@@ -291,6 +293,17 @@ void MainWindow::on_directoriesListView_clicked(const QModelIndex &index)
 {
     QString directoryName = index.data().toString();
 
+    std::vector<Inode> хомяки = storageManager.getInodesForLocation(location);
+
+    for (int i = 0; i < хомяки.size(); i++)
+    {
+        Inode хомяк = хомяки.at(i);
+        if (хомяк.name == directoryName) {
+            // зловили
+            selectedInodeUid = хомяк.uid;
+        }
+    }
+
     std::vector<Inode> directoriesInodes = storageManager.getDirectoriesForLocation(location);
 
     for (int i = 0; i < directoriesInodes.size(); i++)
@@ -330,6 +343,17 @@ void MainWindow::on_directoriesListView_clicked(const QModelIndex &index)
 void MainWindow::on_filesListView_clicked(const QModelIndex &index)
 {
     QString fileName = index.data().toString();
+
+    std::vector<Inode> хомяки = storageManager.getInodesForLocation(location);
+
+    for (int i = 0; i < хомяки.size(); i++)
+    {
+        Inode хомяк = хомяки.at(i);
+        if (хомяк.name == fileName) {
+            // зловили
+            selectedInodeUid = хомяк.uid;
+        }
+    }
 
     std::vector<Inode> filesInodes = storageManager.getFilesForLocation(location);
 
@@ -377,5 +401,24 @@ void MainWindow::on_createUserButton_clicked()
 {
     createUserDialog->setWindowModality(Qt::WindowModality::ApplicationModal);
     createUserDialog->show();
+}
+
+
+void MainWindow::on_deleteButton_clicked()
+{
+    if (selectedInodeUid == -1) return;
+
+    const Inode айнода = storageManager.getInodeByUid(selectedInodeUid);
+
+    if (!*айнода.name) {
+        return;
+    }
+
+    bool яВласник = айнода.ownerUid == currentUserID;
+
+    if (яВласник || айнода.accessRights.write) {
+        storageManager.deleteInodeByUid(selectedInodeUid);
+        renderLocation(location);
+    }
 }
 

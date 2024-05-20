@@ -40,6 +40,7 @@ public:
     std::vector<Inode> getDirectoriesForLocation(const std::string& location) const;
     std::vector<Inode> getFilesForLocation(const std::string& location) const;
     bool addInode(const Inode& inode);
+    void deleteInodeByUid(int uid);
     void persistInodesInBinaryFile(const std::vector<Inode>& inodes);
     int getAvailableSpace() const;
 
