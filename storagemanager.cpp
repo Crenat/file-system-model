@@ -50,18 +50,6 @@ void StorageManager::buildFileSystem() const {
         writeEntity<User>(user, getEntityStartPosition<User>(i + 1));
     }
 
-    // Inode rootInode;
-    // rootInode.uid = 0;
-    // strcpy(rootInode.name, "root");
-    // strcpy(rootInode.location, "/");
-    // rootInode.isDirectory = true;
-    // rootInode.size = 0;
-    // rootInode.ownerUid = 0;
-    // rootInode.accessRights.read = true;
-    // rootInode.accessRights.write = true;
-
-    // writeEntity<Inode>(rootInode, getEntityStartPosition<Inode>(0));
-
     for (int i = 0; i < INODES_COUNT - 1; ++i) {
         Inode inode;
         inode.uid = -1;

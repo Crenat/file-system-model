@@ -12,7 +12,7 @@ class StorageManager {
 public:
     static constexpr char FILE_NAME[] = "/Users/crenat/filesystem.dat";
     static constexpr int USERS_COUNT = 100;
-    static constexpr int INODES_COUNT = 20000;
+    static constexpr int INODES_COUNT = 5000;
     static constexpr int BLOCK_SIZE = 512;
 
     static StorageManager& getInstance();

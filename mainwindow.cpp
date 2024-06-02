@@ -410,9 +410,9 @@ void MainWindow::on_deleteButton_clicked()
 
     const Inode айнода = storageManager.getInodeByUid(selectedInodeUid);
 
-    if (!*айнода.name) {
+    if (!*айнода.name)
         return;
-    }
+
 
     bool яВласник = айнода.ownerUid == currentUserID;
 
@@ -421,4 +421,3 @@ void MainWindow::on_deleteButton_clicked()
         renderLocation(location);
     }
 }
-
